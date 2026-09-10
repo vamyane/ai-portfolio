@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="Gqx9D9aWVfgZLR6gy9vUHr">
+<head data-page-node-id="vlLZ2H8v4Q5HA3apgnD91Y">
+<meta charset="UTF-8" data-page-node-id="3zH2aW0EWVDcZDzkZJQsgb">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="TdalH843wXBACJNtfFzgTo">
+<title>公众号排版器 V2 - 免费在线微信排版工具 | 20+ 差异化模板</title>
+<meta name="description" content="公众号排版器V2 - 免费在线微信排版工具，20+ 风格迥异的模板，手机实时预览，一键复制到公众号" data-page-node-id="iZi7CyGGTtArxgZZLrJ6XV">
+<link rel="stylesheet" href="css/style.css" data-page-node-id="Gt7wkvmdVfCWVqGkOABlQU">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" data-page-node-id="juorEbp7v3T91Cl2g5ewAH">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+</head>
+<body data-page-node-id="YxzfkrJE8hEbt6ZAMWcKBN">
+
+<div id="toast" class="toast hidden" data-page-node-id="QlmvaEjJLX3BszaHsZ012A"></div>
+
+<!-- 顶部导航 -->
+<header class="navbar" data-page-node-id="9RJZoG94lSQFEySElazzfP">
+  <div class="navbar-left" data-page-node-id="7fwjr14GZWWi9qmUwKxN7o">
+    <span class="logo" data-page-node-id="Gh6wVckX0vCUu9bqkNMdSH">✦</span>
+    <span class="brand" data-page-node-id="18LJJ95vibyk05bqqFgLSV">公众号排版器 <b data-page-node-id="mTMrLLKXjhwSBnHOcVxVhI">V2</b></span>
+
+  </div>
+  <div class="navbar-center" data-page-node-id="mw1Qp3ZSRRzfnfObAEGk3P">
+    <div class="zoom-group" data-page-node-id="uUCyUez1CQ4JNG1S4A1Cyy">
+      <button class="zoom-btn" onclick="previewZoomOut()" data-page-node-id="WKhgJBaHza1abOATCPCllU">−</button>
+      <span class="zoom-display" id="zoom-display" data-page-node-id="hCNKHuAcujKuGHwVl8GX9i">100%</span>
+      <button class="zoom-btn" onclick="previewZoomIn()" data-page-node-id="ECWGc0rB8YejHHYcfSDHq9">+</button>
+    </div>
+  </div>
+  <div class="navbar-right" data-page-node-id="vn2bsQPB66fkp9bgMV7IYT">
+    <button class="btn btn-ghost" onclick="toggleShare()" data-page-node-id="CLXhCXbIxjwinOWrUUxWpG">分享</button>
+    <button class="btn btn-ghost" id="mix-btn" onclick="toggleMixMode()" title="混搭：为各部分选择其他模板样式" data-page-node-id="VzCncGBYvrAKl0UWWhU6Z9">混搭</button>
+    <button class="btn btn-primary" onclick="copyToClipboard()" data-page-node-id="OwnKLo8iPsp8cPSelp3LEC">📋 复制到公众号</button>
+    <button class="btn btn-ghost" onclick="clearEditor()" data-page-node-id="TLqtc2IvZH5raw3fxYCzE4">清空</button>
+  </div>
+</header>
+
+<!-- 主区域 -->
+<main class="main" data-page-node-id="CWntzoGE4RLFNwF9iWhOSH">
+
+  <!-- 左栏：模板面板 -->
+  <aside class="panel panel-tpl" data-page-node-id="7zKAZkP2i0GFb7v4zXpIpJ">
+    <div class="panel-header" data-page-node-id="IkIbqhj0fsA1xOnAFkFmnY">
+      <span class="panel-title" data-page-node-id="r2uWTRZr8ae01yItC7luf7">🎨 模板</span>
+      <button class="btn btn-sm btn-recommend" id="recommend-btn2" onclick="recommendTpl()" title="根据内容智能推荐模板" data-page-node-id="ozHxEBeGtEEJCiXncHn9ES">🤖 智能推荐</button>
+      <select id="cat-select" class="cat-select" onchange="filterCategory(this.value)" data-page-node-id="dGECxsny5NAxYaWXRj2aVb">
+        <option value="all" data-page-node-id="1KqBobh2rHJCMxhYa7XYoy">全部</option>
+      </select>
+    </div>
+
+    <div class="tpl-gallery" id="tpl-stack" data-page-node-id="sYdt5jjyflETATX4EBRCUu"></div>
+
+    <div class="tpl-desc" id="tpl-desc" data-page-node-id="eXkC6q2GiizIEhhb1mB102">选择模板</div>
+
+    <details class="panel-section" open data-page-node-id="iDiYP0MIWesrftAeb1jx7A">
+      <summary data-page-node-id="uhuHmM0GWyYHLfubIsj2rB">自定义颜色</summary>
+      <div id="color-panel" data-page-node-id="BJE0KaUYUKOMilZVgALSDn"></div>
+    </details>
+    <div class="resizer resizer-tpl" data-side="tpl" data-page-node-id="vFkvACS6VkIjlNFJYCVscS"></div>
+  </aside>
+
+  <!-- 中栏：编辑区 -->
+  <section class="panel panel-editor" data-page-node-id="FYcW6Yoqm14y5dsnBI223B">
+    <div class="panel-header" data-page-node-id="7ud9uIuRZQuE6m7zRyXg5O">
+      <span class="panel-title" data-page-node-id="mbKMg26FwOcwal1L2yOdCF">✏️ 编辑器</span>
+      <span class="editor-hint" data-page-node-id="PH5XGcmUV5w80N4XOEDpPw">支持 Markdown 语法： # 标题 / ## 小标题 / &gt; 引用 / **加粗** / --- 分隔线</span>
+    </div>
+    <div class="toolbar" id="toolbar" data-page-node-id="hT7X2WAYUyWobOn6VY2qid">
+      <span class="tool-group" data-page-node-id="eSH4ym2xOC5WjFNaL3b9Tv">
+        <button class="tool-btn" onclick="undoEdit()" title="撤销" data-page-node-id="IxtclKlIZl6cxs48y5odkS">↩️</button>
+        <button class="tool-btn" onclick="redoEdit()" title="重做" data-page-node-id="EUgOSBh7NwEsM1NlaMtQvQ">↪️</button>
+      </span>
+      <span class="tool-sep" data-page-node-id="U1nsohjmeSHJkdk4BBIFet"></span>
+      <span class="tool-group" data-page-node-id="JJfxmtKvadOZGMOHEFDsh9">
+        <button class="tool-btn" onclick="wrapSelection('**','**')" title="加粗" data-page-node-id="po2vJieJppszXl14KRFOhr">B</button>
+        <button class="tool-btn" onclick="wrapSelection('*','*')" title="斜体" data-page-node-id="dIIQjyzcHrvACoR2XJTp6O">I</button>
+        <button class="tool-btn" onclick="wrapSelection('~~','~~')" title="删除线" data-page-node-id="AvB916qCOKXBj4z9ehrtke">S̶</button>
+      </span>
+      <span class="tool-sep" data-page-node-id="hQqebn8pdbidrmKvGYqxVx"></span>
+      <span class="tool-group" data-page-node-id="ys1EcnY0uZHowKMX4DcpDC">
+        <button class="tool-btn" onclick="alignText('left')" title="左对齐" data-page-node-id="35BHVQrU2FkMKwDJtrEmne">⇤</button>
+        <button class="tool-btn" onclick="alignText('center')" title="居中" data-page-node-id="30RLopAzEEBaIjADL78GL0">⇹</button>
+        <button class="tool-btn" onclick="alignText('right')" title="右对齐" data-page-node-id="v6MPza54oLjAcIuIrhITs5">⇥</button>
+        <button class="tool-btn" onclick="alignText('justify')" title="两端对齐" data-page-node-id="InC7G8NOzPvv3D8sbdIKkj">☰</button>
+      </span>
+      <span class="tool-sep" data-page-node-id="sQsHtd5omWOqK6UOZlZ4Uf"></span>
+      <span class="tool-group" data-page-node-id="28rTNevgy2nwxWnCQ8QkgF">
+        <button class="tool-btn" onclick="setFontSize(16)" title="正文字号" data-page-node-id="BbRCESyaGRhwKi5vPjPCaH">16</button>
+        <button class="tool-btn" onclick="setFontSize(20)" title="标题字号" data-page-node-id="hZgqBbRAocviUY24IoEopC">20</button>
+        <button class="tool-btn" onclick="setFontSize(24)" title="大标题字号" data-page-node-id="t4Sds3mImIVPdC8T8ptJV7">24</button>
+      </span>
+      <span class="tool-sep" data-page-node-id="1aeEHldUigHv1FQWnVtvNG"></span>
+      <span class="tool-group" data-page-node-id="XrEiuTTkdKSS0iZkfPc4er">
+        <button class="tool-btn" onclick="insertText('### ','')" data-page-node-id="fK39OpKkRGJHHeEGArc5IP">标题</button>
+        <button class="tool-btn" onclick="insertQuoteAtCursor()" data-page-node-id="PrWn1Z4yRZ3QzxajWXdyC3">引用</button>
+        <button class="tool-btn" onclick="insertDividerAtCursor()" data-page-node-id="eeasmUGAZRaDxGYIqsgSXG">分隔线</button>
+        <button class="tool-btn" onclick="insertHighlight()" data-page-node-id="ZEMB0vMdFNUOGGAMA7b1NP">高亮</button>
+        <button class="tool-btn" onclick="insertImage()" data-page-node-id="HYDY7Xse6JiJcoq1BRFTLo">🖼️ 图片</button>
+        <button class="tool-btn" onclick="insertTable()" data-page-node-id="HOQnhNPZzKluTUbaqNvKYl">表格</button>
+      </span>
+    </div>
+    <div class="editor" id="editor" contenteditable="true" spellcheck="false" data-placeholder="在这里粘贴或输入文章内容…" data-page-node-id="Weng7nXkGVQtRmdyEtG0Hu"></div>
+    <div class="resizer resizer-editor" data-side="editor" data-page-node-id="sBbD7sd1Aag33xKQSJjDGb"></div>
+  </section>
+
+  <!-- 右栏：预览区 -->
+  <section class="panel panel-preview" data-page-node-id="tzHiklyvMD4u4XVXBsbGrC">
+    <div class="panel-header" data-page-node-id="H4TamvC37zxF1DJHSXskdO">
+      <span class="panel-title" data-page-node-id="0wXhbieuXw9mWhhL0DNmLQ">📱 手机预览</span>
+      <label class="wx-label" title="开启后复制到公众号时剥离不兼容的 CSS 属性" data-page-node-id="Kk15IkcCLLxemtO307N1TP">
+        <input type="checkbox" id="wx-checkbox" checked data-page-node-id="3a5C47roD6MlhGDzqtsuH2">
+        微信兼容
+      </label>
+    </div>
+    <div class="preview-stage" data-page-node-id="0kR4U2ewiMKy89GQzFyEb7">
+      <div class="phone-screen" data-page-node-id="Im2OhpqR1ksEbWzNCatFio">
+        <div class="preview-scroll" id="preview-scroll" data-page-node-id="UEMCDjHnO7gzvjdTju0QKt">
+          <div class="preview-content" id="preview" data-page-node-id="rLrVmOwFXKoMDyJcTKB2LB">
+            <p style="text-align:center;color:#999;padding:60px 0" data-page-node-id="WDVjsKJWqkv2bOjo5Vywi8">← 选择模板开始预览</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 分享弹窗 -->
+<div id="share-panel" class="popup-panel hidden" data-page-node-id="PLFPUiQ1yHEjXGXwBLMKHe">
+  <div class="popup-inner" data-page-node-id="AurVycVSReAZSpVPVCvzW5">
+    <div class="popup-title" data-page-node-id="pgnQsh6uD2oXiiKHX6iwb3">分享给好友</div>
+    <div class="share-btns" data-page-node-id="71gZPZas2SWdQJkxMe7Bu2">
+      <button class="share-btn" onclick="shareTo('qq')" data-page-node-id="R0t7vBjPlFbcQ2q5k79FFp">QQ</button>
+      <button class="share-btn" onclick="shareTo('weibo')" data-page-node-id="E8xl9ICLG6xLtidAOx7g9S">微博</button>
+      <button class="share-btn" onclick="copyShareLink()" data-page-node-id="2czKxGOMYHtgKkTFmmpc4B">复制链接</button>
+    </div>
+    <button class="close-btn" data-page-node-id="MjuaK6LFNt3WK0xczSCRbY">关闭</button>
+  </div>
+</div>
+
+<!-- 混搭面板 -->
+<div id="mix-panel" class="mix-drawer hidden" data-page-node-id="ZQsv2doSqUvO7uFe9GyQhI">
+  <div class="panel-header" data-page-node-id="E1AtDO0w4ltFduZmOQWBvR">
+    <span class="panel-title" data-page-node-id="tgF66GHPvm7cpKpEA7ER23">🧩 混搭模式</span>
+    <span class="mix-tip" data-page-node-id="53miNf3f2trwfjhLgnsr0S">为各部分选择其他模板样式</span>
+    <button class="close-btn" onclick="toggleMixMode()" data-page-node-id="NFmu7qK07o24syGNlFR0Ms">✕</button>
+  </div>
+  <div class="mix-body" id="mix-body" data-page-node-id="GkJAD8pwBa8PHG5ioDV5Bx">
+    <p style="color:#999;font-size:13px;padding:8px 12px" data-page-node-id="TLIW1GfopfGh2ZivCP4LLu">为不同元素类型选择其他模板的样式，打造专属组合。</p>
+  </div>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="templates/tpl-groupA.js"></script>
+<script src="templates/tpl-groupB.js"></script>
+<script src="templates/tpl-groupC.js"></script>
+<script src="templates/tpl-groupD.js"></script>
+<script src="templates/tpl-groupE.js"></script>
+<script src="templates/tpl-groupF.js"></script>
+<script src="js/app.js"></script>
+<script>
+/* 复制分享链接 */
+function copyShareLink() {
+  var url = window.location.href;
+  var ta = document.createElement('textarea');
+  ta.value = url;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('链接已复制'); } catch (e) { prompt('复制链接：', url); }
+  document.body.removeChild(ta);
+}
+window.copyShareLink = copyShareLink;
+</script>
+</body>
+</html>

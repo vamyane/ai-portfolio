@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞书云文档转帝国后台一键排版工具 - 优化版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="iframe copy.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+            --info-color: #16a085;
+            --purple-color: #9b59b6;
+            --background: #f8f9fa;
+            --card-bg: #ffffff;
+            --card-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f0f5ff 0%, #e6f7ff 100%);
+            color: var(--primary-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 2.5rem;
+            font-weight: 800;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.15);
+        }
+
+        .brand:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.25);
+        }
+
+        .brand i {
+            font-size: 2.2rem;
+            animation: pulse 2s infinite;
+        }
+
+        .sub-brand {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            font-weight: 400;
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 8px 18px;
+            border-radius: 30px;
+            margin-top: 15px;
+            display: inline-block;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 25px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .editor-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(52, 152, 219, 0.1);
+        }
+
+        .editor-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .editor-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #3498db, #9b59b6);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        h3 {
+            margin: 0 0 15px;
+            font-size: 1.3rem;
+            color: var(--secondary-color);
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0f0ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        h3 i {
+            font-size: 1.2em;
+            color: #9b59b6;
+        }
+
+        .editor {
+            flex: 1;
+            overflow: auto;
+            padding: 15px;
+            border: 1px solid #e0f0ff;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            line-height: 1.6;
+            transition: border-color 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        .editor:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px;
+            justify-content: center;
+            margin-bottom: 25px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            max-width: 1400px;
+            margin: 0 auto 30px;
+            border: 1px solid rgba(52, 152, 219, 0.1);
+        }
+
+        .option-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(236, 245, 255, 0.4);
+            align-items: center;
+        }
+
+        .option-group h4 {
+            width: 100%;
+            margin-bottom: 8px;
+            color: #3498db;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-group h4 i {
+            color: #9b59b6;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 3px 8px rgba(52, 152, 219, 0.2);
+            font-size: 14px;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 20px;
+            transition: background 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            font-size: 14px;
+        }
+
+        label:hover {
+            background: rgba(52, 152, 219, 0.2);
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--secondary-color);
+            cursor: pointer;
+        }
+
+        #sourceCode {
+            background: #f8f9fa;
+            white-space: pre-wrap;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            border: 1px solid #e0f0ff;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--secondary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+            box-shadow: var(--card-shadow);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--success-color);
+            box-shadow: 0 3px 8px rgba(39, 174, 96, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: #219653;
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            box-shadow: 0 3px 8px rgba(230, 126, 34, 0.2);
+        }
+
+        .btn-warning:hover {
+            background: #d35400;
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3);
+        }
+
+        .btn-info {
+            background: var(--info-color);
+            box-shadow: 0 3px 8px rgba(22, 160, 133, 0.2);
+        }
+
+        .btn-info:hover {
+            background: #138a72;
+            box-shadow: 0 5px 15px rgba(22, 160, 133, 0.3);
+        }
+
+        .btn-purple {
+            background: var(--purple-color);
+            box-shadow: 0 3px 8px rgba(155, 89, 182, 0.2);
+        }
+
+        .btn-purple:hover {
+            background: #8e44ad;
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.3);
+        }
+
+        .btn-red {
+            background: var(--accent-color);
+            box-shadow: 0 3px 8px rgba(231, 76, 60, 0.2);
+        }
+
+        .btn-red:hover {
+            background: #c0392b;
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-yuloo {
+            background: linear-gradient(135deg, #9b59b6, #3498db);
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(155, 89, 182, 0.3);
+        }
+
+        .btn-yuloo:hover {
+            background: linear-gradient(135deg, #8e44ad, #2980b9);
+            box-shadow: 0 6px 15px rgba(155, 89, 182, 0.4);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease;
+        }
+
+        .feature-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .fix-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #27ae60;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .status-badge {
+            background: #3498db;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+            display: inline-block;
+            align-self: flex-end;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .info-box {
+            background-color: #e3f2fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 14px;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .brand {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .brand {
+                font-size: 1.8rem;
+                padding: 0.8rem 1.5rem;
+            }
+            
+            .editor-container {
+                height: 500px;
+            }
+            
+            .options {
+                padding: 15px;
+            }
+            
+            .option-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="options">
+        <div class="option-group">
+            <h4><i class="fas fa-sliders-h"></i> 内容处理</h4>
+            <label>
+                <input type="checkbox" id="boldProcessing" checked>
+                粗体
+            </label>
+            <label>
+                <input type="checkbox" id="linkProcessing" checked>
+                超链
+            </label>
+            <label>
+                <input type="checkbox" id="tableProcessing" checked>
+                表格
+            </label>
+            <label>
+                <input type="checkbox" id="paragraphIndent" checked>
+                空格
+            </label>
+        </div>
+        
+        <div class="option-group">
+            <h4><i class="fas fa-table"></i> 表格处理</h4>
+            <button onclick="applyTableLayout('fixed')"><i class="btn-icon">适</i> 页面自适应</button>
+            <button onclick="applyTableLayout('auto')"><i class="btn-icon">文</i> 文字自适应</button>
+            <button onclick="removeTableIndent()" class="btn-purple"><i class="btn-icon">缩</i> 取消缩进</button>
+        </div>
+        
+        <div class="option-group">
+            <h4><i class="fas fa-text-height"></i> 段落格式</h4>
+            <button onclick="removeEmptySpans()" class="btn-red"><i class="btn-icon">清</i> 清除乱码</button>
+        </div>
+        
+        <div class="option-group">
+            <h4><i class="fas fa-star"></i> 核心功能</h4>
+            <button onclick="processContent()" class="btn-primary"><i class="btn-icon">排</i> 一键排版</button>
+            <button onclick="yulooStyle()" class="btn-yuloo"><i class="btn-icon">育</i> 育路样式</button>
+            <button onclick="removeComments()" class="btn-info"><i class="btn-icon">注</i> 清除注释</button>
+            <button onclick="copySource()" class="btn-warning"><i class="btn-icon">复</i> 复制源码</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="editor-container">
+            <h3><i class="fas fa-file-import"></i> 原始内容</h3>
+            <div class="editor" id="inputArea" contenteditable="true">
+                <!-- 示例内容 -->
+                
+                <p>示例内容</p>
+            </div>
+            <div class="status-badge">可编辑区域</div>
+        </div>
+        
+        <div class="editor-container">
+            <h3><i class="fas fa-check-circle"></i> 排版结果</h3>
+            <div class="editor" id="outputArea"></div>
+            <div class="status-badge">预览区域</div>
+        </div>
+
+        <div class="editor-container">
+            <h3><i class="fas fa-code"></i> 源代码</h3>
+            <pre class="editor" id="sourceCode"></pre>
+            <div class="status-badge">HTML代码</div>
+        </div>
+    </div>
+
+    <script>
+        // 状态管理
+        let hasSpace = false;
+        let currentTableLayout = 'auto';
+        const presetColors = [
+            'rgb(192, 80, 77)',
+            'rgb(79, 129, 189)',
+            'rgb(75, 172, 198)',
+            'rgb(247, 150, 70)'
+        ];
+        
+        // 存储当前文章的统一表格颜色
+        let currentArticleColor = null;
+        
+        // 图片库数据（简化版）
+        const imageLibrary = [
+            {src: "http://www.yuloo.com/d/file/2505/1747889415560883.jpg" , alt: "北京爱迪国际学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889433341345.jpg" , alt: "北京市朝阳区北外同文外国语学校"},
+			{src: "http://www.yuloo.com/d/file/2505/1747889433341345.jpg" , alt: "北外同文外国语学校"},
+			{src: "http://www.yuloo.com/d/file/2505/1747889433341345.jpg" , alt: "北京朝阳区北外同文外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889438848498.jpg" , alt: "北京大兴熙诚学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889441791639.jpg" , alt: "北京大兴熙诚学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889443959055.jpg" , alt: "北京德闳学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889447554720.jpg" , alt: "北京第八中学怡海分校国际部"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889451247217.jpg" , alt: "北京东方红学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889454141402.jpg" , alt: "北京东方红学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889459385785.jpg" , alt: "北京东方红学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889465448331.jpg" , alt: "北京东方红学校封面图"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889472537080.jpg" , alt: "北京海淀区尚丽外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889476619230.jpg" , alt: "北京市海淀区尚丽外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889482305720.jpg" , alt: "北京海淀区尚丽外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889489995666.jpg" , alt: "北京市海淀尚丽外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889494806303.jpg" , alt: "北京怀柔索兰诺中学"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889498262230.jpg" , alt: "北京丽泽国际学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889505675956.jpg" , alt: "北京师范大学亚太实验学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889511590192.jpg" , alt: "北京实验外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889516484826.jpg" , alt: "北京市朝阳区博雅学校 "},
+            {src: "http://www.yuloo.com/d/file/2505/1747889520414377.jpg" , alt: "北京市朝阳区博雅学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889527726169.jpg" , alt: "北京市朝阳区凯文学校"},
+			{src: "http://www.yuloo.com/d/file/2505/1747889527726169.jpg" , alt: "北京朝阳区凯文学校"},
+			{src: "http://www.yuloo.com/d/file/2505/1747889527726169.jpg" , alt: "北京市朝阳区凯文学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889531167661.jpg" , alt: "北京市朝阳区新亚学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889536652508.jpg" , alt: "北京市朝阳区新亚学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889544281546.jpg" , alt: "北京市朝阳区新亚学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889548821137.jpg" , alt: "北京市丰台区新北赋学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889557323257.jpg" , alt: "北京市海淀区崛起实验学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889563601145.jpg" , alt: "北京市汇贤学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889574838791.jpg" , alt: "北京市汇贤学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889773197789.jpg" , alt: "北京市君谊中学"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889777819819.jpg" , alt: "北京市仁泽高级中学"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889784800763.jpg" , alt: "北京市实验外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889793908709.jpg" , alt: "北京市世纪学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889799165177.jpg" , alt: "北京市私立汇佳学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889806171896.jpg" , alt: "北京市私立汇佳学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889814695426.jpg" , alt: "北京市通州区私立树人学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889820456422.jpg" , alt: "北京市通州区私立树人学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889826181252.jpg" , alt: "北京新府学外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889832585487.jpg" , alt: "北京新府学外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889839546854.jpg" , alt: "北京新府学外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889844761921.jpg" , alt: "北京新府学外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889850778079.jpg" , alt: "北京市新英才学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889855395353.jpg" , alt: "北京市正泽学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889860191499.jpg" , alt: "北京市中关村外国语学校"},
+			{src: "http://www.yuloo.com/d/file/2505/1747889860191499.jpg" , alt: "中关村外国语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889870308745.jpg" , alt: "北京中加学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889881675895.jpg" , alt: "北京中加学校通州华仁学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889891396274.jpg" , alt: "北京市忠德学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889895642245.jpg" , alt: "北京市忠德学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889901439745.jpg" , alt: "北京顺义区诺德安达学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889909252555.jpg" , alt: "北京四中国际课程佳莲校区"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889913881013.jpg" , alt: "北京王府学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889920299424.jpg" , alt: "北京一土致知学校"},
+			{src: "http://www.yuloo.com/d/file/2505/1747889920299424.jpg" , alt: "北京朝阳区一土致知学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889931555729.jpg" , alt: "法拉古特学校天津校区"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889940402196.jpg" , alt: "海南英雅盛彼德学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889950242318.jpg" , alt: "华油荣德小学"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889958121724.jpg" , alt: "华油荣德小学"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889966892798.jpg" , alt: "京城学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889973185969.jpg" , alt: "橘郡国际学校（北京校区）"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889982276850.jpg" , alt: "君城国际双语学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889987322589.jpg" , alt: "青苗学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889992694120.jpg" , alt: "青苗学校海淀校区"},
+            {src: "http://www.yuloo.com/d/file/2505/1747889997714846.jpg" , alt: "青苗学校怀柔校区"},
+            {src: "http://www.yuloo.com/d/file/2505/1748412932987545.jpg", alt:"青苗学校顺义校区"},
+            {src: "http://www.yuloo.com/d/file/2505/1748412940525616.jpg", alt:"清华志清中学"},
+            {src: "http://www.yuloo.com/d/file/2505/1748412969488580.jpg", alt:"清华志清中学国际部"},
+            {src: "http://www.yuloo.com/d/file/2505/1748412987849387.jpg", alt:"三河光大国际部"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413000999446.jpg", alt:"三河市燕桥学校高中部"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413007131636.jpg", alt:"三河市燕桥学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413015754997.jpg", alt:"三河市燕桥学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413020531774.jpg", alt:"天津法耀高级中学"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413025584060.jpg", alt:"天津黑利伯瑞国际学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413034479278.jpg", alt:"天津惠灵顿学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413043636801.jpg", alt:"天津美达菲学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413051520939.jpg", alt:"天津维多利亚世界学院"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413060814108.jpg", alt:"耀华国际学校北京校区"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413076473267.jpg", alt:"张家口未来学校(原张家口北京一零一实验学校)"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413081116730.jpg", alt:"张家口未来学校"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413089902305.jpg", alt:"张家口未来学校(原张家口北京一零一实验学校)"},
+            {src: "http://www.yuloo.com/d/file/2505/1748413093256559.jpg", alt:"中育贝拉"},
+			{src: "http://www.yuloo.com/d/file/2506/1749522581578943.jpg", alt:"天津市新城高级中学"},
+			{src: "http://www.yuloo.com/d/file/2506/1749522598308274.jpg", alt:"天津市新城高级中学"},
+			{src: "http://www.yuloo.com/d/file/2506/1749522614182465.jpg", alt:"天津新城高级中学"},
+			{src: "http://www.yuloo.com/d/file/2506/1750930355490119.jpg", alt:"哈罗北京"},
+			{src: "http://www.yuloo.com/d/file/2506/1750930299268886.jpg", alt:"北京京西国际学校"},
+			{src: "http://www.yuloo.com/d/file/2506/1750930299268886.jpg", alt:"北京京西国际学校"},
+			{src: "http://www.yuloo.com/d/file/2506/1751273629173158.jpg", alt:"北京鼎石国际学校"},
+			{src: "http://www.yuloo.com/d/file/2506/1751274357219201.jpg", alt:"燕园正德学校"},
+			{src: "http://www.yuloo.com/d/file/2506/1751274329775606.jpg", alt:"北京昌平区星元学校"},
+			{src: "http://www.yuloo.com/d/file/2506/1751274295636997.png", alt:"北京昌平区佳莲学校"},
+			{src: "http://www.yuloo.com/d/file/2507/1751362382525585.jpg", alt:"蓝湾未来领导力学校"},
+			{src: "http://www.yuloo.com/d/file/2507/1751620251910416.jpg", alt:"海嘉国际双语学校"},
+			{src: "http://www.yuloo.com/d/file/2507/1751620334391798.jpg", alt:"北京市顺义区诺德安达学校"},
+			{src: "http://www.yuloo.com/d/file/2507/1751876084276655.jpg", alt:"君诚国际双语学校"},
+			{src: "http://www.yuloo.com/d/file/2507/1751877252527672.jpg", alt:"北京乐成国际学校"},
+			{src: "http://www.yuloo.com/d/file/2507/1751877165241460.jpg", alt:"北京市朝阳区赫德学校"},
+			{src: "http://www.yuloo.com/d/file/2507/1751877060500387.jpg", alt:"北京世青国际学校"},
+			 {src: "http://www.yuloo.com/d/file/2507/1751877134650117.png", alt:"启明星双语学校"},
+			{src: "http://www.yuloo.com/d/file/2507/1752054897857453.jpg", alt:"耀华国际教育学校北京亦庄校区"},
+			{src: "http://www.yuloo.com/d/file/2507/1752832972108493.jpg", alt:"领科教育北京校区"},
+			{src: "http://www.yuloo.com/d/file/2507/1752833015296766.jpg", alt:"北京外国语大学国际课程中心"},
+			{src: "http://www.yuloo.com/d/file/2507/1752833108760115.jpg", alt:"北京市师达中学"},
+			{src: "http://www.yuloo.com/d/file/2507/1753088081926054.jpg", alt:"天津美达菲国际学校"},
+			{src: "http://www.yuloo.com/d/file/2507/1753777452296422.jpg" , alt:"北京市第八中学怡海分校国际部"},
+			{src: "http://www.yuloo.com/d/file/2507/1753952135984884.png" , alt:"北京海淀凯文学校"},
+			{src: "http://www.yuloo.com/d/file/2507/1753952200310608.png" , alt:"北京德威英国国际学校"},
+			{src: "http://www.yuloo.com/d/file/2508/1754295160543318.jpg" , alt:"海口哈罗学校"},
+			{src: "http://www.yuloo.com/d/file/2509/1758611830287567.jpg" , alt:"成都七中国际部"},
+			{src: "http://www.yuloo.com/d/file/2509/1758611742740354.jpg" , alt:"成都新津墨尔文学校"},
+			{src: "http://www.yuloo.com/d/file/2509/1758611720917770.jpg" , alt:"成都石室天府中学国际部"},
+			{src: "http://www.yuloo.com/d/file/2509/1758611808357027.jpg" , alt:"成都电子科技大学国际课程中心"},
+			{src: "http://www.yuloo.com/d/file/2509/1758611755264791.jpg" , alt:"成都华爱融合部"},
+			{src: "http://www.yuloo.com/d/file/2509/1758611793603394.jpg" , alt:"成都沃顿公学"},
+        ];
+        function convertHeadings(html) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+
+    // 转换h4到h3
+    tempDiv.querySelectorAll('h4').forEach(h4 => {
+        const h3 = document.createElement('h3');
+        h3.innerHTML = h4.innerHTML;
+        h3.id = h4.id; // 保留id属性
+        h3.className = h4.className; // 保留class属性
+        h3.style.cssText = h4.style.cssText; // 保留内联样式
+        h4.parentNode.replaceChild(h3, h4);
+    });
+
+    // 转换h5到h6
+    tempDiv.querySelectorAll('h5').forEach(h5 => {
+        const h6 = document.createElement('h6');
+        h6.innerHTML = h5.innerHTML;
+        h6.id = h5.id;
+        h6.className = h5.className;
+        h6.style.cssText = h5.style.cssText;
+        h5.parentNode.replaceChild(h6, h5);
+    });
+
+    return tempDiv.innerHTML;
+	content = convertHeadings(content);
+}
+
+        // 核心处理流程
+        function processContent() {
+            // 在开始处理时重置当前文章颜色
+            currentArticleColor = presetColors[Math.floor(Math.random() * presetColors.length)];
+             
+            let inputHTML = document.getElementById('inputArea').innerHTML;
+            
+            // 清理原始内容
+            inputHTML = cleanFeishuSpecialSymbols(inputHTML);
+           
+            let content = cleanAttributes(inputHTML)
+                .replace(/<div>/gi, '<p>')
+                .replace(/<\/div>/gi, '</p>')
+                .replace(/<(ol|ul)>/gi, '')
+                .replace(/<\/(ol|ul)>/gi, '')
+                .replace(/<li>/gi, '<p>')
+                .replace(/<\/li>/gi, '</p>');
+
+            // 处理表格前空白行
+            content = content.replace(
+                /<p>\s*(?:<!--.*?-->|<meta[^>]*>|<style>.*?<\/style>|<\/?byte-sheet[^>]*>)*\s*<\/p>(?=\s*<table)/gi, 
+                ''
+            );
+            
+            // 创建临时容器进行全面空白行处理
+            const tempContainer = document.createElement('div');
+            tempContainer.innerHTML = content;
+            
+            // 1. 处理无标签的连续空白（空格、换行等）
+            function cleanTextNodes(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const trimmedContent = node.textContent.replace(/^\s+|\s+$/g, '');
+                    // 压缩连续空白（多个空格、换行等变为一个空格）
+                    node.textContent = trimmedContent.replace(/[\s\u3000]{2,}/g, ' ');
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    // 递归处理子节点
+                    for (let i = 0; i < node.childNodes.length; i++) {
+                        cleanTextNodes(node.childNodes[i]);
+                    }
+                }
+            }
+            cleanTextNodes(tempContainer);
+            
+            // 2. 处理BR标签和空段落
+            function processBrsAndEmptyParagraphs() {
+                // 找到所有的br标签
+                const brElements = tempContainer.querySelectorAll('br');
+                
+                // 处理br标签前后的空白
+                brElements.forEach(br => {
+                    // 删除br标签前后的纯空白文本节点
+                    let prev = br.previousSibling;
+                    let next = br.nextSibling;
+                    
+                    if (prev && prev.nodeType === Node.TEXT_NODE && /^\s*$/.test(prev.textContent)) {
+                        prev.remove();
+                    }
+                    
+                    if (next && next.nodeType === Node.TEXT_NODE && /^\s*$/.test(next.textContent)) {
+                        next.remove();
+                    }
+                });
+                
+                // 删除所有空的段落（包括只包含BR标签的情况）
+                tempContainer.querySelectorAll('p').forEach(p => {
+                    let isOnlyBr = true;
+                    let hasNonBlankText = false;
+                    
+                    // 检查段落内容
+                    for (const child of p.childNodes) {
+                        if (child.nodeType === Node.TEXT_NODE) {
+                            // 如果有非空白文本
+                            if (child.textContent.trim() !== '') {
+                                hasNonBlankText = true;
+                            }
+                        } else if (child.nodeType === Node.ELEMENT_NODE) {
+                            // 如果不是BR标签，则不视为"纯BR"段落
+                            if (child.tagName !== 'BR' && 
+                                !['IMG', 'TABLE', 'IFRAME', 'HR'].includes(child.tagName)) {
+                                isOnlyBr = false;
+                            }
+                        }
+                    }
+                    
+                    // 删除空的段落和只包含一个或多个BR标签的段落
+                    const isEmpty = !hasNonBlankText && (isOnlyBr || p.textContent.trim() === '');
+                    if (isEmpty && !p.querySelector('img, table, iframe, hr')) {
+                        p.remove();
+                    }
+                });
+                
+                // 处理连续的多个br标签
+                const allBrGroups = [];
+                let currentBrGroup = [];
+                
+                // 递归查找连续的br标签
+                function findBrGroups(node) {
+                    if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
+                        currentBrGroup.push(node);
+                    } else {
+                        if (currentBrGroup.length > 1) {
+                            allBrGroups.push([...currentBrGroup]);
+                        }
+                        currentBrGroup = [];
+                        
+                        if (node.childNodes) {
+                            for (const child of node.childNodes) {
+                                findBrGroups(child);
+                            }
+                        }
+                    }
+                }
+                findBrGroups(tempContainer);
+                
+                // 压缩连续的br标签组（保留一个）
+                allBrGroups.forEach(brGroup => {
+                    if (brGroup.length > 1) {
+                        // 保留第一个br，删除后续的br
+                        for (let i = 1; i < brGroup.length; i++) {
+                            brGroup[i].remove();
+                        }
+                    }
+                });
+            }
+            processBrsAndEmptyParagraphs();
+            
+            // 3. 删除其他空元素
+            const emptyElements = ['div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+            emptyElements.forEach(tag => {
+                tempContainer.querySelectorAll(tag).forEach(el => {
+                    // 检查元素内容是否为空
+                    if (el.textContent.trim() === '' && 
+                        el.querySelectorAll(':not(br)').length === 0 && // 不包含除br外的元素
+                        el.childElementCount === (el.querySelectorAll('br').length) // 所有子元素都是br
+                        ) {
+                        el.remove();
+                    }
+                });
+            });
+            
+            // 4. 压缩多个相邻的空行（无标签空行）
+            let previousNode = null;
+            Array.from(tempContainer.childNodes).forEach(node => {
+                // 检查是否是无标签的空白行（如连续的换行符）
+                if (node.nodeType === Node.TEXT_NODE && /^\s+$/.test(node.textContent)) {
+                    // 如果前一个节点也是空节点，则删除当前节点
+                    if (previousNode && previousNode.nodeType === Node.TEXT_NODE && 
+                        /^\s+$/.test(previousNode.textContent)) {
+                        node.remove();
+                    } else {
+                        previousNode = node;
+                    }
+                } else {
+                    previousNode = null;
+                }
+            });
+            
+            // 5. 处理表格前的空白行
+            tempContainer.querySelectorAll('table').forEach(table => {
+                let prev = table.previousSibling;
+                while (prev) {
+                    // 删除表格前的空段落
+                    if (prev.nodeType === Node.ELEMENT_NODE && 
+                        prev.tagName === 'P' && 
+                        /^[\s\u3000]*$/.test(prev.textContent)) {
+                        const toRemove = prev;
+                        prev = prev.previousSibling;
+                        toRemove.remove();
+                    } 
+                    // 删除表格前的文本空行
+                    else if (prev.nodeType === Node.TEXT_NODE && 
+                             /^\s+$/.test(prev.textContent)) {
+                        const toRemove = prev;
+                        prev = prev.previousSibling;
+                        toRemove.remove();
+                    } 
+                    // 遇到非空节点则停止
+                    else {
+                        break;
+                    }
+                }
+            });
+            
+            content = tempContainer.innerHTML;
+            
+            // 6. 压缩多个连续的空段落为最多一个空白行
+            content = content.replace(/(<p>\s*<\/p>\s*){2,}/gi, '<p>&nbsp;</p>');
+            
+            // 处理链接
+            if(document.getElementById('linkProcessing').checked) {
+                content = processLinkAttributes(content);
+            }
+
+            // 处理表格
+            content = document.getElementById('tableProcessing').checked ? 
+                processTables(content) : 
+                content.replace(/<table[\s\S]*?<\/table>/gi, '');
+                
+            // 根据复选框状态处理段首空格
+            if(document.getElementById('paragraphIndent').checked) {
+                // 普通段落添加空格
+                content = content.replace(/<p>/g, '<p>　　');
+                
+                // 处理表格内的段落
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = content;
+                tempDiv.querySelectorAll('td p, th p').forEach(p => {
+                    p.innerHTML = '　　' + p.innerHTML;
+                });
+                content = tempDiv.innerHTML;
+            }
+
+            document.getElementById('outputArea').innerHTML = content;
+            updateSourceCode();
+            
+            // 清除注释
+            removeCommentsFromOutput();
+        }
+
+        // 清除乱码功能
+        function removeEmptySpans() {
+            const inputArea = document.getElementById('inputArea');
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = inputArea.innerHTML;
+            
+            // 查找所有span标签
+            const spans = tempDiv.querySelectorAll('span');
+            
+            let count = 0;
+            spans.forEach(span => {
+                if (!span.textContent.trim()) {
+                    const textNode = document.createTextNode(span.textContent);
+                    span.parentNode.replaceChild(textNode, span);
+                    count++;
+                }
+            });
+            
+            inputArea.innerHTML = tempDiv.innerHTML;
+            showNotification(`🧹 已清除 ${count} 个空span标签`);
+        }
+
+        // 清理飞书特殊符号
+        function cleanFeishuSpecialSymbols(html) {
+            let cleaned = html.replace(/\{\"text\":\"(.*?)\",.*?\}/g, (match, p1) => {
+                return p1.replace(/\\\"/g, '"');
+            });
+            
+            cleaned = cleaned.replace(/\s*<{3,}\s*([^>]+)\s*>{3,}\s*/g, '$1');
+            cleaned = cleaned.replace(/data-lark-record-format="[^"]*"/g, '');
+            cleaned = cleaned.replace(/class="lark-record-clipboard"/g, '');
+            cleaned = cleaned.replace(/\s*"\s*\}\s*,\s*"attribs[^"]*"[^}]*\}\s*\}\s*/g, '');
+            
+            return cleaned;
+        }
+
+        function cleanAttributes(html) {
+            if(!document.getElementById('boldProcessing').checked) {
+                html = html.replace(/<(strong|b)>/gi, '')
+                          .replace(/<\/(strong|b)>/gi, '');
+            }
+
+            if(!document.getElementById('linkProcessing').checked) {
+                html = html.replace(/<a\s+[^>]*>/gi, '')
+                          .replace(/<\/a>/gi, '');
+            }
+
+            return html.replace(/<(\w+)(\s+[^>]*)?>/g, (match, tag, attrs) => {
+                const tagLower = tag.toLowerCase();
+                if (tagLower === 'a' && document.getElementById('linkProcessing').checked) {
+                    const href = (attrs?.match(/href\s*=\s*["']([^"']*)["']/i) || [])[1] || '';
+                    return `<a href="${href}">`;
+                }
+                return `<${tag}>`;
+            });
+        }
+
+        // 表格处理（使用统一颜色）
+        function processTables(html) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+
+            // 使用当前文章的统一颜色
+            const tableColor = currentArticleColor;
+
+            tempDiv.querySelectorAll('table').forEach(table => {
+                // 处理首行
+                const firstRow = table.rows[0];
+                Array.from(firstRow.cells).forEach(td => {
+                    const th = document.createElement('th');
+                    th.innerHTML = `<span style="text-wrap-mode: wrap; color: #FFFFFF;">${td.innerHTML}</span>`;
+                    firstRow.replaceChild(th, td);
+                });
+
+                // 应用样式
+                const cells = table.querySelectorAll('th, td');
+                
+                cells.forEach(cell => {
+                    cell.style.borderColor = 'rgb(221, 221, 221)';
+                    if (cell.tagName === 'TD') {
+                        cell.setAttribute('align', 'center');
+                        cell.setAttribute('valign', 'middle');
+                    } else {
+                        cell.style.backgroundColor = tableColor;
+                    }
+                });
+            });
+
+            return tempDiv.innerHTML;
+        }
+
+        // 链接处理
+        function processLinkAttributes(html) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            tempDiv.querySelectorAll('a').forEach(a => {
+                a.className = 'yuloo_article_link';
+                
+                a.target = '_blank';
+            });
+
+            return tempDiv.innerHTML;
+        }
+
+        // 表格布局处理
+        function applyTableLayout(type) {
+            currentTableLayout = type;
+            const tables = document.querySelectorAll('#outputArea table');
+            tables.forEach(table => {
+                table.style.width = type === 'fixed' ? "100%" : "";
+                table.style.whiteSpace = type === 'fixed' ? 'nowrap' : '';
+            });
+            updateSourceCode();
+            showNotification(type === 'fixed' ? '🖥️ 表格已设置为页面自适应' : '📐 表格已设置为文字自适应');
+        }
+
+        // 取消表格缩进
+        function removeTableIndent() {
+            const outputArea = document.getElementById('outputArea');
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = outputArea.innerHTML;
+
+            // 1. 移除表格前的空段落
+            tempDiv.querySelectorAll('table').forEach(table => {
+                let prev = table.previousElementSibling;
+                while (prev && prev.tagName === 'P' && /^[\s　]*$/.test(prev.textContent)) {
+                    prev.remove();
+                    prev = table.previousElementSibling;
+                }
+            });
+
+            // 2. 处理表格单元格内的p标签
+            tempDiv.querySelectorAll('td, th').forEach(cell => {
+                const pTags = cell.querySelectorAll('p');
+                pTags.forEach(p => {
+                    p.innerHTML = p.innerHTML.replace(/^[　\s]+/, '');
+                    
+                    const content = document.createElement('div');
+                    content.innerHTML = p.innerHTML;
+                    
+                    while (content.firstChild) {
+                        p.parentNode.insertBefore(content.firstChild, p);
+                    }
+                    
+                    p.remove();
+                });
+            });
+
+            outputArea.innerHTML = tempDiv.innerHTML;
+            updateSourceCode();
+            showNotification('📏 表格缩进已移除（包括表格内的p标签）');
+        }
+
+        // 添加学校图片
+        function addSchoolImages() {
+            const outputArea = document.getElementById('outputArea');
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = outputArea.innerHTML;
+
+            tempDiv.querySelectorAll('h6').forEach(h6 => {
+                const schoolName = h6.textContent.trim();
+                const matchedImages = imageLibrary.filter(img => 
+                    img.alt.includes(schoolName) || schoolName.includes(img.alt)
+                );
+
+                if (matchedImages.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * matchedImages.length);
+                    const selectedImage = matchedImages[randomIndex];
+
+                    const imgHTML = `
+                        <p style="text-align: center;">
+                            <img src="${selectedImage.src}" alt="${selectedImage.alt}">
+                        </p>`;
+                    
+                    let nextSibling = h6.nextElementSibling;
+                    let replaced = false;
+                    
+                    while (nextSibling) {
+                        if (nextSibling.tagName === 'P' && nextSibling.querySelector('img')) {
+                            nextSibling.outerHTML = imgHTML;
+                            replaced = true;
+                            break;
+                        }
+                        nextSibling = nextSibling.nextElementSibling;
+                    }
+                    
+                    if (!replaced) {
+                        h6.insertAdjacentHTML('afterend', imgHTML);
+                    }
+                }
+            });
+
+            outputArea.innerHTML = tempDiv.innerHTML;
+            updateSourceCode();
+        }
+        
+        // 更新源代码显示
+        function updateSourceCode() {
+            document.getElementById('sourceCode').textContent = 
+                document.getElementById('outputArea').innerHTML;
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            const div = document.createElement('div');
+            div.className = 'notification';
+            div.innerHTML = `<i class="fas fa-info-circle"></i> <span>${message}</span>`;
+            document.body.appendChild(div);
+            setTimeout(() => {
+                div.classList.add('pulse');
+            }, 10);
+            setTimeout(() => {
+                div.remove();
+            }, 2500);
+        }
+
+        // 复制源码
+        function copySource() {
+            const textarea = document.createElement('textarea');
+            textarea.value = document.getElementById('sourceCode').textContent;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showNotification('✅ 源代码已复制到剪贴板！');
+        }
+
+        // 标题样式处理函数 - 修复超链接问题
+        function applyTitleStyles() {
+            const outputArea = document.getElementById('outputArea');
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = outputArea.innerHTML;
+            
+            // 标题样式库
+            const h2Styles = [
+                { 
+                    h2: 'class="yuloo_primary_title yuloo_primary_tit7" style="--text-color: #3189a6;"',
+                    h3: 'class="yuloo_sec_title yuloo_sec_tit7" style="--text-color: #3189a6;"',
+                    hasNumber: false
+                },
+                { 
+                    h2: 'class="yuloo_primary_title yuloo_primary_tit8" style="--text-color: #f04402;"',
+                    h3: 'class="yuloo_sec_title yuloo_sec_tit8" style="--text-color: #f04402;"',
+                    hasNumber: false
+                },
+                { 
+                    h2: 'class="yuloo_primary_title yuloo_primary_tit1" style="--text-color: #d2a24d;"',
+                    h3: 'class="yuloo_sec_title yuloo_sec_tit1" style="--text-color: #d2a24d;"',
+                    hasNumber: true
+                },
+                { 
+                    h2: 'class="yuloo_primary_title yuloo_primary_tit6" style="--text-color: #1f6e8c;"',
+                    h3: 'class="yuloo_sec_title yuloo_sec_tit6" style="--text-color: #1f6e8c;"',
+                    hasNumber: true
+                },
+				{ 
+                    h2: 'class="yuloo_primary_title yuloo_primary_tit9" style="--text-color: #773127;"',
+                    h3: 'class="yuloo_sec_title yuloo_sec_tit9" style="--text-color: #773127;"',
+                    hasNumber: false
+                },
+				{ 
+                    h2: 'class="yuloo_primary_title yuloo_primary_tit10" style="--text-color: #f04001;"',
+                    h3: 'class="yuloo_sec_title yuloo_sec_tit9" style="--text-color: #f04001;"',
+                    hasNumber: false
+                },
+				{ 
+                    h2: 'class="yuloo_primary_title yuloo_primary_tit2" style="--text-color: #e4202c;"',
+                    h3: 'class="yuloo_sec_title yuloo_sec_tit2" style="--text-color: #e4202c;"',
+                    hasNumber: true
+                },
+				{ 
+                    h2: 'class="yuloo_primary_title yuloo_primary_tit3" style="--text-color: #5a2a12;"',
+                    h3: 'class="yuloo_sec_title yuloo_sec_tit3" style="--text-color: #5a2a12;"',
+                    hasNumber: true
+                },
+				{ 
+                    h2: 'class="yuloo_primary_title yuloo_primary_tit4" style="--text-color: #5a2a12;"',
+                    h3: 'class="yuloo_sec_title yuloo_sec_tit4" style="--text-color: #5a2a12;"',
+                    hasNumber: true
+                },
+				{ 
+                    h2: 'class="yuloo_primary_title yuloo_primary_tit5" style="--text-color: #8a6230;"',
+                    h3: 'class="yuloo_sec_title yuloo_sec_tit5" style="--text-color: #8a6230;"',
+                    hasNumber: true
+                },
+            ];
+            
+            const h6Styles = 
+			[
+                '<h6 class="yuloo_school_title"><span class="yuloo_school_span yuloo_school_span0">$1</span></h6>',
+                '<h6 class="yuloo_school_title"><em class="yuloo_school_num1">$2</em><span class="yuloo_school_span yuloo_school_span1">$1</span></h6>',
+                '<h6 class="yuloo_school_title"><em class="yuloo_school_num2">$2</em><span class="yuloo_school_span yuloo_school_span2">$1<em class="cir-icon cir-icon1"></em><em class="cir-icon cir-icon2"></em><em class="cir-icon cir-icon3"></em><em class="cir-icon cir-icon4"></em></span></h6>',
+                '<h6 class="yuloo_school_title"><span class="yuloo_school_span yuloo_school_span3"><em class="yuloo_school_num3">$2</em>$1</span></h6>',
+                '<h6 class="yuloo_school_title"><span class="yuloo_school_span yuloo_school_span4"><em class="yuloo_school_num4">$2</em>$1<em class="yuloo_rect yuloo_rect1"></em><em class="yuloo_rect yuloo_rect2"></em></span></h6>',
+                '<h6 class="yuloo_school_title"><span class="yuloo_school_span yuloo_school_span5" style="--text-color:#5a2a12"><em class="yuloo_school_num5">$2</em>$1</span></h6>',
+                '<h6 class="yuloo_school_title"><span class="yuloo_school_span yuloo_school_span6" style="--text-color:#f04001"><em class="yuloo_school_num6">$2</em>$1</span></h6>',
+                '<h6 class="yuloo_school_title"><em class="yuloo_school_num7">NO.$2</em><span class="yuloo_school_span yuloo_school_span7" style="--text-color:#5a2a12">$1</span></h6>'
+            ];
+            
+            // 随机选择一组样式
+            const styleIndex = Math.floor(Math.random() * h2Styles.length);
+            const selectedStyle = h2Styles[styleIndex];
+            
+            const h2Elements = tempDiv.querySelectorAll('h2');
+            let h2Counter = 1;
+            
+            h2Elements.forEach(h2 => {
+                // 保留原始内容（包括超链接）
+                const originalContent = h2.innerHTML;
+                
+                // 创建新的h2元素
+                const newH2 = document.createElement('h2');
+                newH2.className = selectedStyle.h2.split('class="')[1].split('"')[0];
+                // 动态生成ID（无论hasNumber是true还是false都生成）
+                newH2.id = `yuloo_primary_num${h2Counter.toString().padStart(2, '0')}`;
+                newH2.style.cssText = selectedStyle.h2.split('style="')[1].split('"')[0];
+                
+                if (selectedStyle.hasNumber) {
+                    const span = document.createElement('span');
+                    span.className = 'yuloo_primary_span';
+                    span.style.cssText = `--text-color:${selectedStyle.h2.split('--text-color:')[1].split(';')[0]}`;
+                    span.textContent = h2Counter.toString().padStart(2, '0');
+                    
+                    newH2.appendChild(span);
+                    newH2.appendChild(document.createTextNode(' ')); // 添加空格分隔
+                    
+                    // 保留原始内容（包括超链接）
+                    const contentDiv = document.createElement('div');
+                    contentDiv.innerHTML = originalContent;
+                    while (contentDiv.firstChild) {
+                        newH2.appendChild(contentDiv.firstChild);
+                    }
+                } else {
+                    // 直接保留原始内容（包括超链接）
+                    newH2.innerHTML = originalContent;
+                }
+                
+                h2.parentNode.replaceChild(newH2, h2);
+                h2Counter++; // 计数器递增
+            });
+            
+            // 处理h3标题 - 修复超链接问题
+            const h3Elements = tempDiv.querySelectorAll('h3');
+            let h3Counter = 1;
+            
+            h3Elements.forEach(h3 => {
+                // 保留原始内容（包括超链接）
+                const originalContent = h3.innerHTML;
+                
+                const newH3 = document.createElement('h3');
+                newH3.className = selectedStyle.h3.split('class="')[1].split('"')[0];
+                // 动态生成ID
+                newH3.id = `yuloo_sec_num${h3Counter.toString().padStart(2, '0')}`;
+                newH3.style.cssText = selectedStyle.h3.split('style="')[1].split('"')[0];
+                
+                const span = document.createElement('span');
+                span.className = 'yuloo_sec_span';
+                
+                // 保留原始内容（包括超链接）
+                span.innerHTML = originalContent;
+                
+                newH3.appendChild(span);
+                
+                h3.parentNode.replaceChild(newH3, h3);
+                h3Counter++;
+            });
+            
+            // 处理h6标题
+            const h6Elements = tempDiv.querySelectorAll('h6');
+            const h6StyleIndex = Math.floor(Math.random() * h6Styles.length);
+            let h6Counter = 1;
+            
+            h6Elements.forEach(h6 => {
+                let titleText = h6.textContent.trim();
+                
+                const existingEm = h6.querySelector('.yuloo_school_num1, .yuloo_school_num2, .yuloo_school_num3');
+                const existingSpan = h6.querySelector('.yuloo_school_span');
+                
+                if (existingEm || existingSpan) {
+                    titleText = h6.textContent.replace(/\d+/g, '').replace('NO.', '').trim();
+                }
+                
+                let style;
+                if (h6StyleIndex === 0) {
+                    style = h6Styles[0].replace('$1', titleText);
+                } else {
+                    const number = h6Counter.toString().padStart(2, '0');
+                    style = h6Styles[h6StyleIndex]
+                        .replace('$1', titleText)
+                        .replace('$2', number);
+                    h6Counter++;
+                }
+                
+                h6.outerHTML = style;
+            });
+            
+            outputArea.innerHTML = tempDiv.innerHTML;
+            updateSourceCode();
+        }
+        
+        // 导语样式处理函数
+        function applyIntroStyle() {
+            const outputArea = document.getElementById('outputArea');
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = outputArea.innerHTML;
+            
+            // 尝试找到现有的导语元素
+            let existingDaoyu = tempDiv.querySelector('.yuloo_daoyu_box');
+            let content = '';
+            
+            if (existingDaoyu) {
+                const contentPara = existingDaoyu.querySelector('p:not(.yuloo_daoyu_tit)');
+                if (contentPara) {
+                    content = contentPara.innerHTML;
+                }
+                existingDaoyu.remove();
+            } else {
+                const paragraphs = tempDiv.querySelectorAll('p');
+                for (let i = 0; i < paragraphs.length; i++) {
+                    const p = paragraphs[i];
+                    if (p.textContent.trim() !== '') {
+                        content = p.innerHTML;
+                        p.remove();
+                        break;
+                    }
+                }
+            }
+            
+            if (!content) {
+                showNotification('⚠️ 未找到可设置导语的段落');
+                return;
+            }
+            
+            content = content.replace(/^[　\s]+/, '');
+            
+            // 导语样式库
+            const introStyles = [
+                `<section class="yuloo_daoyu_box yuloo_daoyu1">
+                    <p class="yuloo_daoyu_tit">
+                        导语<em>introduction</em>
+                    </p>
+                    <p>
+                        ${content}
+                    </p>
+                </section>`,
+                `<section class="yuloo_daoyu_box yuloo_daoyu2">
+                    <p class="yuloo_daoyu_tit">
+                        <span class="yuloo_daoyu_span">导语</span><em>introduction</em>
+                    </p>
+                    <p>
+                        ${content}
+                    </p>
+                </section>`,
+                `<section class="yuloo_daoyu_box yuloo_daoyu3">
+                    <p class="yuloo_daoyu_tit">
+                        <img class="daoyu-img" src="http://www.yuloo.com/images/public-img/daoyu-img.jpg" alt="doayu"/>
+                    </p>
+                    <p>
+                        ${content}
+                    </p>
+                </section>`
+            ];
+            
+            const randomStyle = introStyles[Math.floor(Math.random() * introStyles.length)];
+            
+            if (tempDiv.firstChild) {
+                tempDiv.insertAdjacentHTML('afterbegin', randomStyle);
+            } else {
+                tempDiv.innerHTML = randomStyle;
+            }
+            
+            outputArea.innerHTML = tempDiv.innerHTML;
+            updateSourceCode();
+        }
+        
+        // 清除注释（从输出区域）
+        function removeCommentsFromOutput() {
+            let outputHTML = document.getElementById('outputArea').innerHTML;
+            // 清除HTML注释
+            outputHTML = outputHTML.replace(/<!--[\s\S]*?-->/g, '');
+            document.getElementById('outputArea').innerHTML = outputHTML;
+            updateSourceCode();
+            showNotification('🧹 已清除HTML注释');
+        }
+        
+        // 清除注释（源代码显示区域）
+        function removeComments() {
+            // 获取源代码内容
+            const sourceCode = document.getElementById('sourceCode');
+            let code = sourceCode.textContent;
+            
+            // 正则表达式匹配各种注释
+            const commentPatterns = [
+                // HTML注释 <!-- -->
+                /<!--[\s\S]*?-->/g,
+            ];
+            
+            // 清除所有匹配的注释
+            commentPatterns.forEach(pattern => {
+                code = code.replace(pattern, '');
+            });
+            
+            // 更新源代码显示
+            sourceCode.textContent = code;
+            showNotification('🧹 注释已清除！');
+        }
+        
+
+		
+		 // 育路样式集成功能
+        function yulooStyle() {
+            // 应用样式前清除注释
+            removeCommentsFromOutput();
+
+            // 重置样式
+            processContent()
+            // 其他操作
+            applyTitleStyles();
+            applyIntroStyle();
+            addSchoolImages();
+            updateSourceCode();
+
+            showNotification('育路样式已成功应用！');
+        }
+
+        // 粘贴事件处理
+        document.getElementById('inputArea').addEventListener('paste', function(e) {
+            e.preventDefault();
+            const clipboardData = e.clipboardData || window.clipboardData;
+            let html = clipboardData.getData('text/html');
+            let text = clipboardData.getData('text/plain');
+            
+            if (html) {
+                html = cleanFeishuSpecialSymbols(html);
+                document.execCommand('insertHTML', false, html);
+            } else {
+                text = cleanFeishuSpecialSymbols(text);
+                document.execCommand('insertText', false, text);
+            }
+        });
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSourceCode();
+        });
+    </script>
+</body>
+</html>

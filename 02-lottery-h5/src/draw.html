@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>抽奖进行中 · 客户福利抽奖</title>
+<style>
+  :root {
+    --primary: #a83232;
+    --primary-dark: #7a1f1f;
+    --gold: #c9a227;
+    --gold-dark: #a8851f;
+    --bg: #fff8f0;
+    --text: #3d2b1f;
+    --green: #2e7d32;
+    --ink: #2b1a12;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(160deg, #fff8f0 0%, #ffe9d6 40%, #ffd9c0 100%);
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+  .confetti { position: fixed; top:-20px; width:16px; height:24px; z-index:0; pointer-events:none; opacity:.5; animation: fall linear infinite; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+  .wrap { max-width: 520px; margin:0 auto; padding: 16px 16px 60px; position:relative; z-index:1; }
+
+  .header { text-align:center; padding: 10px 0 4px; }
+  .header .badge {
+    display:inline-block; background:var(--primary-dark); color:#fdf6ec; font-size:12px;
+    padding:5px 16px; border-radius:20px; letter-spacing:2px; margin-bottom:10px;
+    box-shadow: 0 2px 8px rgba(122,31,31,.22); font-weight:600;
+  }
+  .header h1 { font-size:24px; font-weight:800; letter-spacing:2px; color:var(--ink); line-height:1.4; }
+  .header .rule { width:120px; height:2px; margin:10px auto 0; background:linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+  .card {
+    background:#fff; border-radius:18px; padding:22px;
+    box-shadow: 0 10px 30px rgba(180,80,30,.12);
+    margin-top: 18px; position:relative;
+    border:1px solid rgba(255,213,79,.5);
+  }
+
+  /* 抽奖动画区 */
+  .draw-title { font-size:16px; font-weight:700; margin-bottom:16px; color:#7a3b00; display:flex; align-items:center; gap:8px; }
+  .draw-box { text-align:center; }
+  .roller {
+    position:relative; height:120px; border-radius:14px; overflow:hidden;
+    background: linear-gradient(180deg,#fff, #fff8ec, #fff);
+    border:2px solid #f0c986; box-shadow: inset 0 0 20px rgba(255,183,77,.15);
+    margin-bottom:18px;
+  }
+  .roll-item {
+    position:absolute; left:0; right:0; height:120px; display:flex; align-items:center; justify-content:center;
+    font-size:20px; font-weight:800; color:#7a3b00; opacity:0;
+    transform: translateY(120px);
+  }
+  .roll-item.active { opacity:1; }
+  @keyframes roll {
+    0% { transform: translateY(120px); opacity:0; }
+    5% { opacity:1; }
+    100% { transform: translateY(-40px); }
+  }
+  .rolling .roll-item { animation: roll 0.5s linear infinite; }
+  .roll-item.reveal { animation: none; transform: translateY(0); opacity:1; transition: none; }
+  .win-flash { position:absolute; inset:0; pointer-events:none; border-radius:14px; opacity:0; }
+  .win-flash.on { animation: flash 0.8s ease 3; opacity:1; }
+  @keyframes flash { 0%,100%{box-shadow: inset 0 0 0 0 rgba(255,193,7,0);} 50%{box-shadow: inset 0 0 60px 10px rgba(255,193,7,.7);} }
+  .btn-skip { display:none; margin:0 auto 6px; padding:6px 20px; background:rgba(0,0,0,.4); color:#fff; border:none; border-radius:16px; font-size:12px; cursor:pointer; }
+  .btn-skip.show { display:inline-block; }
+
+  /* 结果卡片 */
+  .result-card { display:none; }
+  .result-card.show { display:block; }
+  .result-emoji { font-size:56px; margin-bottom:10px; }
+  .result-title { font-size:22px; margin-bottom:8px; }
+  .result-title.win { color:var(--primary); }
+  .result-title.lose { color:#888; }
+  .prize-card { background:#fff8ec; border:1.5px dashed #f0c986; border-radius:12px; padding:14px; margin:10px 0; }
+  .prize-card .pname { font-size:16px; font-weight:800; color:#7a3b00; }
+  .prize-card .psub { font-size:12px; color:#b07a4e; margin-top:4px; }
+  .result-detail { font-size:14px; color:#666; line-height:1.8; margin:10px 0; }
+  .result-detail b { color:var(--primary-dark); }
+  .result-btn { width:100%; padding:14px; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; margin-top:8px; }
+  .result-btn.primary { background:var(--primary); color:#fff; box-shadow:0 4px 14px rgba(198,40,40,.3); }
+  .result-btn.ghost { background:#f5f5f5; color:#666; }
+  .test-badge { color:#c62828; font-weight:700; }
+
+  /* 中奖名单 */
+  .winners-head { font-size:14px; font-weight:800; color:#7a3b00; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+  .winners-viewport { height:110px; overflow:hidden; position:relative; border-radius:10px; background:#fffdf8; border:1px dashed #f0c986; }
+  .winners-list { position:absolute; left:0; right:0; top:0; transition: transform .6s ease; }
+  .winner-row { display:flex; justify-content:space-between; align-items:center; padding:8px 14px; font-size:13px; color:#5a3b1e; border-bottom:1px solid rgba(240,201,134,.35); }
+  .winner-row:last-child { border-bottom:none; }
+  .winner-user { font-weight:700; color:#7a3b00; }
+  .winner-ref { color:#b07a4e; font-size:12px; }
+  .winners-empty { padding:40px 10px; text-align:center; font-size:12px; color:#c9b094; }
+
+  .footer { text-align:center; font-size:11px; color:#b07a4e; margin-top:22px; line-height:1.8; padding:0 10px; }
+  .footer b { color:var(--primary); }
+</style>
+</head>
+<body>
+  <div id="confetti-wrap"></div>
+  <div class="wrap">
+    <div class="header">
+      <div class="badge">活动主办方</div>
+      <h1>抽奖进行中</h1>
+      <div class="rule"></div>
+    </div>
+
+    <!-- 抽奖动画区 -->
+    <div class="card" id="drawCard">
+      <div class="draw-title">🎰 正在为您揭晓结果...</div>
+      <div class="draw-box">
+        <div class="roller" id="roller">
+          <div class="win-flash" id="winFlash"></div>
+          <div class="roll-item" id="rollItem">🎉 中奖！</div>
+        </div>
+        <button class="btn-skip" id="skipBtn" onclick="skipReveal()">点击跳过动画</button>
+      </div>
+    </div>
+
+    <!-- 结果展示 -->
+    <div class="card result-card" id="resultCard">
+      <div class="draw-title">✨ 抽奖结果</div>
+      <div style="text-align:center;">
+        <div class="result-emoji" id="resEmoji">🎉</div>
+        <h2 class="result-title win" id="resTitle">恭喜中奖！</h2>
+        <div class="prize-card" id="resPrizeCard">
+          <div class="pname">🎫 专家门诊挂号卡 ×1</div>
+          <div class="psub">可用于专家门诊预约挂号服务</div>
+        </div>
+        <div class="result-detail" id="resDetail"></div>
+        <button class="result-btn ghost" onclick="location.href='lottery.html'">返回首页</button>
+      </div>
+    </div>
+
+    <!-- 中奖名单滚动 -->
+    <div class="card">
+      <div class="winners-head">🎉 幸运中奖名单</div>
+      <div class="winners-viewport" id="winnersViewport">
+        <div class="winners-list" id="winnersList"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      本活动最终解释权归活动主办方所有<br>
+      中奖结果以截图发送推荐人核验
+    </div>
+  </div>
+
+<script>
+  // ================= 后端 API =================
+  const API_BASE = "https://yilaoshi411-d8g3b2zjn3d6b265d-1457845483.ap-shanghai.app.tcloudbase.com/lottery-api";
+
+  let state = { drawing:false, isWin:null, testMode:false, deviceId:"" };
+  let animTimer = null, resolved = false;
+  let currentUser='', currentRef='';
+
+  // ================= 设备指纹 =================
+  function getDeviceId() {
+    if (state.deviceId) return state.deviceId;
+    try {
+      const nav = navigator.userAgent;
+      const screen = `${screen.width}x${screen.height}x${screen.colorDepth}`;
+      const seed = `${nav}|${screen}|${navigator.language}|${navigator.platform}`;
+      let hash = 0;
+      for (let i=0;i<seed.length;i++){ hash = ((hash<<5)-hash) + seed.charCodeAt(i); hash |= 0; }
+      state.deviceId = 'dev_' + Math.abs(hash).toString(16) + '_' + Date.now().toString(16);
+    } catch(e) {
+      state.deviceId = 'dev_' + Math.random().toString(16).slice(2) + '_' + Date.now().toString(16);
+    }
+    return state.deviceId;
+  }
+
+  // ================= 飘落红包 =================
+  function spawnConfetti() {
+    const wrap = document.getElementById('confetti-wrap');
+    const emojis = ['🧧','🎁','🎉','✨'];
+    for (let i=0;i<14;i++){
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.textContent = emojis[i%emojis.length];
+      el.style.left = Math.random()*100 + '%';
+      el.style.animationDuration = (6 + Math.random()*8) + 's';
+      el.style.animationDelay = (Math.random()*6) + 's';
+      el.style.fontSize = (12 + Math.random()*14) + 'px';
+      wrap.appendChild(el);
+    }
+  }
+
+  // ================= 进入抽奖动画 =================
+  function enterDrawAnimation() {
+    state.drawing = true;
+    resolved = false;
+    document.getElementById('skipBtn').classList.remove('show');
+    document.getElementById('winFlash').classList.remove('on');
+
+    const roller = document.getElementById('roller');
+    const item = document.getElementById('rollItem');
+    roller.classList.add('rolling');
+    item.textContent = '🎰 抽奖中...';
+    item.classList.remove('reveal');
+
+    animTimer = setTimeout(() => { resolveReveal(); }, 2200 + Math.random()*800);
+    setTimeout(()=>{ if(state.drawing) document.getElementById('skipBtn').classList.add('show'); }, 2000);
+  }
+
+  function skipReveal() {
+    if (state.drawing && !resolved) resolveReveal();
+  }
+
+  function resolveReveal() {
+    if (resolved) return;
+    resolved = true;
+    state.drawing = false;
+    clearTimeout(animTimer);
+    document.getElementById('skipBtn').classList.remove('show');
+
+    const roller = document.getElementById('roller');
+    const item = document.getElementById('rollItem');
+    roller.classList.remove('rolling');
+
+    if (state.isWin) {
+      item.textContent = '🎉 恭喜中奖！';
+      document.getElementById('winFlash').classList.add('on');
+    } else {
+      item.textContent = '😅 很遗憾，未中奖';
+    }
+    setTimeout(showResult, 500);
+  }
+
+  // ================= 展示结果 =================
+  function showResult() {
+    document.getElementById('drawCard').style.display = 'none';
+    document.getElementById('resultCard').classList.add('show');
+
+    const emoji = document.getElementById('resEmoji');
+    const title = document.getElementById('resTitle');
+    const prizeCard = document.getElementById('resPrizeCard');
+    const detail = document.getElementById('resDetail');
+
+    const testBadge = state.testMode ? '<br><span class="test-badge">🧪 测试模式：本次结果未计入奖池统计</span>' : '';
+
+    if (state.isWin) {
+      emoji.textContent = '🎉';
+      title.textContent = '恭喜中奖！';
+      title.className = 'result-title win';
+      prizeCard.style.display = 'block';
+      detail.innerHTML = '请将下方<b>中奖截图</b>发送给您的推荐人，<br>由推荐人协助您完成兑奖核验，谢谢！' + testBadge;
+    } else {
+      emoji.textContent = '😅';
+      title.textContent = '未中奖，再接再厉';
+      title.className = 'result-title lose';
+      prizeCard.style.display = 'none';
+      detail.innerHTML = '感谢您的参与！<br>您可将<b>参与截图</b>发送给推荐人，<br>后续活动优先通知您。' + testBadge;
+    }
+  }
+
+  // ================= 加载中奖名单 =================
+  let winnersData = [], winnersTimer = null, winnersIndex = 0;
+
+  async function loadWinners() {
+    try {
+      const resp = await fetch(`${API_BASE}/api/winners`);
+      const data = await resp.json();
+      if (data.ok && Array.isArray(data.winners)) {
+        winnersData = data.winners;
+        renderWinners();
+      }
+    } catch(e) { console.log('加载中奖名单失败', e); }
+  }
+
+  function renderWinners() {
+    const list = document.getElementById('winnersList');
+    if (!list) return;
+    if (!winnersData || winnersData.length === 0) {
+      list.innerHTML = '<div class="winners-empty">🎯 暂无中奖记录，快来成为第一个幸运儿吧！</div>';
+      return;
+    }
+    const items = winnersData.map(w => `
+      <div class="winner-row">
+        <span class="winner-user">${escapeHtml(w.user)}</span>
+        <span class="winner-ref">推荐顾问：${escapeHtml(w.ref)}</span>
+      </div>`).join('');
+    list.innerHTML = items + items;
+    winnersIndex = 0;
+    list.style.transform = 'translateY(0)';
+    startWinnersScroll();
+  }
+
+  function startWinnersScroll() {
+    if (winnersTimer) clearInterval(winnersTimer);
+    const viewport = document.getElementById('winnersViewport');
+    const list = document.getElementById('winnersList');
+    if (!viewport || !list || winnersData.length === 0) return;
+    const rowH = 36;
+    winnersTimer = setInterval(() => {
+      winnersIndex++;
+      list.style.transform = `translateY(${-winnersIndex * rowH}px)`;
+      if (winnersIndex >= winnersData.length) {
+        setTimeout(() => {
+          winnersIndex = 0;
+          list.style.transition = 'none';
+          list.style.transform = 'translateY(0)';
+          setTimeout(() => { list.style.transition = 'transform .6s ease'; }, 20);
+        }, 650);
+      }
+    }, 3000);
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  // ================= 入口：读取表单数据并抽奖 =================
+  async function initDraw() {
+    spawnConfetti();
+    loadWinners();
+
+    // 从 sessionStorage 读取首页填写的姓名/推荐人（由 lottery.html 跳转时写入）
+    const user = sessionStorage.getItem('lottery_user') || '';
+    const ref  = sessionStorage.getItem('lottery_ref') || '';
+
+    if (!user || !ref) {
+      // 没有表单数据（比如直接打开本页）→ 回首页
+      alert('请先填写姓名和推荐人后再抽奖');
+      location.href = 'lottery.html';
+      return;
+    }
+
+    currentUser = user; currentRef = ref;
+    enterDrawAnimation();
+
+    // 调后端抽奖
+    try {
+      const resp = await fetch(`${API_BASE}/api/draw`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user, ref, deviceId: getDeviceId() })
+      });
+      const data = await resp.json();
+
+      if (data.ok) {
+        state.isWin = data.win;
+        state.testMode = !!data.testMode;
+        // 等动画结束后展示
+      } else if (data.code === 'DUP') {
+        showError('⚠️ 检测到您或您的推荐人已参与过抽奖，每人限抽1次！');
+      } else if (data.code === 'SOLD_OUT') {
+        showError('😢 很抱歉，挂号卡已全部抽完！');
+      } else {
+        showError(`⚠️ ${data.error || '抽奖失败，请稍后重试'}`);
+      }
+    } catch(e) {
+      console.log('抽奖请求失败', e);
+      showError('⚠️ 网络异常，请检查网络后重试');
+    }
+  }
+
+  function showError(msg) {
+    clearTimeout(animTimer);
+    resolved = true;
+    state.drawing = false;
+    document.getElementById('drawCard').style.display = 'none';
+    document.getElementById('resultCard').classList.add('show');
+    document.getElementById('resEmoji').textContent = '😥';
+    document.getElementById('resTitle').textContent = '抽奖未完成';
+    document.getElementById('resTitle').className = 'result-title lose';
+    document.getElementById('resPrizeCard').style.display = 'none';
+    document.getElementById('resDetail').innerHTML = `${msg}<br><br>`;
+  }
+
+  // 初始化
+  initDraw();
+</script>
+</body>
+</html>

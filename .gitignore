@@ -1,0 +1,30 @@
+# 依赖
+node_modules/
+vendor/
+
+# 运行时与浏览器内核
+runtime/
+browser-profile/
+
+# 本地数据（含个人配置与登录态）
+data/
+*.db
+*.sqlite
+
+# 密钥与配置
+.env
+.env.*
+!.env.example
+*config.local.*
+user-config.json
+
+# 日志与临时文件
+*.log
+*.tmp
+tmp/
+.tmp/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
